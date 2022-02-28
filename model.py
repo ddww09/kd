@@ -51,7 +51,6 @@ class RBERT(BertPreTrainedModel):
         avg_vector = sum_vector.float() / length_tensor.float()  # broadcasting
         return avg_vector
 
-    # 当调用trainer.py outputs = self.model(**inputs)执行
     def forward(self, input_ids, attention_mask, token_type_ids, labels, e1_mask, e2_mask):
         outputs = self.bert(input_ids, attention_mask=attention_mask,
                             token_type_ids=token_type_ids)  # sequence_output, pooled_output, (hidden_states), (attentions)
@@ -61,11 +60,9 @@ class RBERT(BertPreTrainedModel):
         # Average
         e1_h = self.entity_average(sequence_output, e1_mask)
         e2_h = self.entity_average(sequence_output, e2_mask)
-
-        # 新加
+        
         e1_arr = []
         e2_arr = []
-        # 计算e1_id, e2_id
         e2_info = []
         e1_info = []
         e1info_attention_mask = []
@@ -77,14 +74,11 @@ class RBERT(BertPreTrainedModel):
         f = open('data/extra_dict.tsv', 'r')
 
         for i in range(batch):
-            #  提取实体
             a = pd.DataFrame(e1_id[i]).replace(0, np.NAN)
             a.dropna(inplace=True)
             a = np.array(a).astype(np.int32).reshape(1, -1)[0]
             a = a.tolist()
-            # 删除最后一个109
             a.pop()
-            # 删除第一个109
             del (a[0])
 
             e1_arr.append(a)
@@ -93,13 +87,9 @@ class RBERT(BertPreTrainedModel):
             b.dropna(inplace=True)
             b = np.array(b).astype(np.int32).reshape(1, -1)[0]
             b = b.tolist()
-            # 删除最后一个109
             b.pop()
-            # 删除第一个109
             del (b[0])
             e2_arr.append(b)
-
-        # 在extra文件中相同的实体，如果找到返回后边的实体解释
 
         for i in range(batch):
             lines = f.readlines()
@@ -148,10 +138,7 @@ class RBERT(BertPreTrainedModel):
                     break
 
         f.close()
-
-        # 把得到的信息送入模型(之后把attention换成e1attention，e2attention)
-
-        # 需要先变成tensor（）
+     
         e1_info = torch.LongTensor(e1_info)
         e2_info = torch.LongTensor(e2_info)
         e1info_attention_mask = torch.LongTensor(e1info_attention_mask)
@@ -194,20 +181,14 @@ class RBERT(BertPreTrainedModel):
 
         m1 = nn.LayerNorm(concat_h.size()[0:]).cuda()
         concat_h = m1(concat_h)
-        # concat_h=self.out_layer(concat_h)  # dropout
-
+        
         m2 = nn.LayerNorm(concat_h2.size()[0:]).cuda()
         concat_h2 = m2(concat_h2)
-        # concat_h2 = self.out_layer(concat_h2)  # dropout
 
         logits = self.label_classifier(concat_h)
         logits2 = self.label_classifier(concat_h2)
-        #lianhe = logits * 0.5 + logits2 * 0.5
 
-        # 先尝试2
-        #outputs = (logits,) + outputs[2:]  # add hidden states and attention if they are here
         outputs = (logits2,) + outputs[2:]  # add hidden states and attention if they are here
-        #outputs3 = (lianhe,) + outputs[2:]  # add hidden states and attention if they are here
 
         # Softmax
         if labels is not None:
