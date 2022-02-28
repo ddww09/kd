@@ -50,10 +50,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--seed', type=int, default=42, help="random seed for initialization")
 
-    # 修改过原来16
     #parser.add_argument("--batch_size", default=4, type=int, help="Batch size for training and evaluation.")
     parser.add_argument("--batch_size", default=1, type=int, help="Batch size for training and evaluation.")
-    # 修改过原来300
     # parser.add_argument("--max_seq_len", default=400, type=int,
     #                     help="The maximum total input sequence length after tokenization.")
     parser.add_argument("--max_seq_len", default=400, type=int,
@@ -71,10 +69,7 @@ if __name__ == '__main__':
     parser.add_argument("--max_steps", default=-1, type=int,
                         help="If > 0: set total number of training steps to perform. Override num_train_epochs.")
     parser.add_argument("--warmup_steps", default=0, type=int, help="Linear warmup over warmup_steps.")
-    # 原来0.1
     parser.add_argument("--dropout_rate", default=0.5, type=float, help="Dropout for fully-connected layers")
-
-# 原来400
     parser.add_argument('--logging_steps', type=int, default=1000, help="Log every X updates steps.")
     parser.add_argument('--save_steps', type=int, default=1000, help="Save checkpoint every X updates steps.")
 
